@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT AJAX Update</title>
+</head>
+<body>
+    <h2>MQTT Data from "DIR":</h2>
+    <p id="mqtt-data">Waiting for data...</p>
+    <p id="mqtt-timestamp">Received at: - </p>
+
+    <h3>Send Data to MQTT</h3>
+    <input type="text" id="mqtt-input" placeholder="Enter Value">
+    <button onclick="sendData()">Submit</button>
+    
+
+    <script>
+        function fetchData() {
+            fetch('http://192.168.1.54:3000/get-data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("mqtt-data").innerText = `Data: ${data.data}`;
+                    document.getElementById("mqtt-timestamp").innerText = `Received at: ${data.timestamp}`;
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        function sendData() {
+            const value = document.getElementById("mqtt-input").value;
+            fetch('http://192.168.1.54:3000/send-data', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Sent:", data.sent);
+                document.getElementById("sent-timestamp").innerText = `Sent at: ${data.sentTime}`;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        setInterval(fetchData, 1000); // อัปเดตค่าทุก 1 วินาที
+    </script>
+</body>
+</html>
